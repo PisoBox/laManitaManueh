@@ -47,7 +47,6 @@ def reader(filename):
         line = f.readline()
         # Obtener informacion general
         parsed_line = line.split(" ")
-        print(line)
         data.dur = int(parsed_line[0])
         data.inter_no = int(parsed_line[1])
         data.streets_no = int(parsed_line[2])
@@ -61,7 +60,6 @@ def reader(filename):
         while counter < data.streets_no:
             line = f.readline()
             parsed_line = line.split(" ")
-            print(line)
             calle = Calle()
             calle.entry = int(parsed_line[0])
             calle.exit = int(parsed_line[1])
@@ -80,7 +78,6 @@ def reader(filename):
         while counter < data.cars_no:
             line = f.readline()
             parsed_line = line.split(" ")
-            print(line)
             coche = Coche()
             coche.str_no = int(parsed_line[0])
             parsed_line[-1] = parsed_line[-1][:-1]
@@ -95,35 +92,40 @@ def reader(filename):
 
 def main():
     """ Main program """
-    tiempo_interseccion = 10
-    
-    filename = "c.txt"
-    data, calles, coches, inters = reader(filename)
-    
-    inters_write = []
-    counter = 0
-    for inter in inters:
-        coches_total = 0
-        inter_write = {}
-        for calle in inter.streets:
-            coches_total += calle.num_coches
-        for calle in inter.streets:
-            if coches_total != 0:
-                rent = float(calle.num_coches) / float(coches_total)
-                time_semaforo = int(rent * tiempo_interseccion) + 1
-                inter_write[calle.ID] = time_semaforo
+    tiempo_interseccion = 5
 
-        if (len(inter_write.keys()) > 0):
-            inters_write.append((inter.id,inter_write))
+    filenames = ["a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt"]
+    for filename in filenames:
+        print(filename)
+        data, calles, coches, inters = reader(filename)
 
-    with open("result_" + filename, "w") as f:
-        f.write(str(len(inters_write)) + '\n')
-        for id, inter in inters_write:
-            if(len(inter.keys()) > 0):
-                f.write(str(id) + '\n')
-                f.write(str(len(inter.keys())) + '\n')
-                for calle in inter.keys():
-                    f.write(calle + " " + str(inter[calle]) + '\n')
+        inters_write = []
+        counter = 0
+        for inter in inters:
+            coches_total = 0
+            inter_write = {}
+            for calle in inter.streets:
+                coches_total += calle.num_coches
+            for calle in inter.streets:
+                if coches_total != 0:
+                    rent = float(calle.num_coches) / float(coches_total)
+                    if rent > 0.0:
+                        time_semaforo = int(rent * tiempo_interseccion)
+                        if time_semaforo == 0:
+                            time_semaforo += 1
+                        inter_write[calle.ID] = time_semaforo
+
+            if (len(inter_write.keys()) > 0):
+                inters_write.append((inter.id,inter_write))
+
+        with open("result_" + filename, "w") as f:
+            f.write(str(len(inters_write)) + '\n')
+            for id, inter in inters_write:
+                if(len(inter.keys()) > 0):
+                    f.write(str(id) + '\n')
+                    f.write(str(len(inter.keys())) + '\n')
+                    for calle in inter.keys():
+                        f.write(calle + " " + str(inter[calle]) + '\n')
 
     return 0
 
