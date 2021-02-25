@@ -72,6 +72,7 @@ def reader(filename):
                 inters[calle.exit].streets = [calle]
             else:
                 inters[calle.exit].streets.append(calle)
+            inters[calle.exit].id = calle.exit
             counter += 1
 
         # Coches parser
@@ -96,7 +97,7 @@ def main():
     """ Main program """
     tiempo_interseccion = 10
     
-    filename = "f.txt"
+    filename = "c.txt"
     data, calles, coches, inters = reader(filename)
     
     inters_write = []
@@ -109,18 +110,20 @@ def main():
         for calle in inter.streets:
             if coches_total != 0:
                 rent = float(calle.num_coches) / float(coches_total)
-                time_semaforo = int(rent * tiempo_interseccion)
+                time_semaforo = int(rent * tiempo_interseccion) + 1
                 inter_write[calle.ID] = time_semaforo
-        inters_write.append(inter_write)
+
+        if (len(inter_write.keys()) > 0):
+            inters_write.append((inter.id,inter_write))
 
     with open("result_" + filename, "w") as f:
         f.write(str(len(inters_write)) + '\n')
-        counter = 0
-        for inter in inters_write:
-            f.writelines(str(counter) + '\n')
-            for calle in inter.keys():
-                f.write(calle + " " + str(inter[calle]) + '\n')
-            counter += 1
+        for id, inter in inters_write:
+            if(len(inter.keys()) > 0):
+                f.write(str(id) + '\n')
+                f.write(str(len(inter.keys())) + '\n')
+                for calle in inter.keys():
+                    f.write(calle + " " + str(inter[calle]) + '\n')
 
     return 0
 
