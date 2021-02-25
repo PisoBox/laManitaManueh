@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class InfoGen:
     dur = 0
@@ -29,6 +30,9 @@ class Calle:
         self.L = 0
         self.rent = 0
         self.num_coches = 0
+        self.total_time_coches = 0
+        self.min = 10000000000
+        self.max = -1000000000
 
 class Interesc:
     streets = []
@@ -83,19 +87,27 @@ def reader(filename):
             parsed_line[-1] = parsed_line[-1][:-1]
             coche.ruta = parsed_line[1:]
             coches.append(coche)
-
+            total_time = 0
             for ruta in coche.ruta:
                 calles[ruta].num_coches += 1
+                total_time += calles[ruta].L
+
+            for ruta in coche.ruta:
+                calles[ruta].total_time_coches += total_time
+                calles[ruta].min = min(calles[ruta].min, total_time)
+                calles[ruta].max = max(calles[ruta].max, total_time)
 
             counter += 1
     return data, calles, coches, inters
 
 def main():
     """ Main program """
-    tiempo_interseccion = 5
 
+    times = [10, 10, 10, 10, 10, 10]
     filenames = ["a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt"]
+    times_index = 0
     for filename in filenames:
+        tiempo_interseccion = times[times_index]
         print(filename)
         data, calles, coches, inters = reader(filename)
 
@@ -104,13 +116,22 @@ def main():
         for inter in inters:
             coches_total = 0
             inter_write = {}
+            coches_total_L = 0
+            max_todas = 0
             for calle in inter.streets:
                 coches_total += calle.num_coches
+                coches_total_L += calle.total_time_coches
+                max_todas = max(max_todas, calle.max)
             for calle in inter.streets:
-                if coches_total != 0:
-                    rent = float(calle.num_coches) / float(coches_total)
+                if coches_total != 0 and calle.total_time_coches != 0:
+                    #rent = float(calle.num_coches) / float(coches_total)
+                    #rent = (float(calle.num_coches) / float(coches_total))/float(calle.total_time_coches)
+                    #rent = (float(calle.num_coches) / float(coches_total)) / (float(calle.total_time_coches) / data.dur)
+                    #rent = float(calle.num_coches) / float(coches_total) * float(calle.total_time_coches/coches_total_L)
+                    rent = float(calle.num_coches) / float(coches_total) * float(float(calle.min + calle.max)/2.0 / float(max_todas))
                     if rent > 0.0:
                         time_semaforo = int(rent * tiempo_interseccion)
+                        #time_semaforo = int(random.randint(1, 15))
                         if time_semaforo == 0:
                             time_semaforo += 1
                         inter_write[calle.ID] = time_semaforo
@@ -126,7 +147,7 @@ def main():
                     f.write(str(len(inter.keys())) + '\n')
                     for calle in inter.keys():
                         f.write(calle + " " + str(inter[calle]) + '\n')
-
+        times_index += 1
     return 0
 
 
