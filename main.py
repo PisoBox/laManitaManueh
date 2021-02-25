@@ -96,7 +96,7 @@ def main():
     """ Main program """
     tiempo_interseccion = 10
     
-    filename = "a.txt"
+    filename = "f.txt"
     data, calles, coches, inters = reader(filename)
     
     inters_write = []
@@ -107,12 +107,13 @@ def main():
         for calle in inter.streets:
             coches_total += calle.num_coches
         for calle in inter.streets:
-            rent = float(calle.num_coches) / float(coches_total)
-            time_semaforo = int(rent * tiempo_interseccion)
-            inter_write[calle.ID] = time_semaforo
+            if coches_total != 0:
+                rent = float(calle.num_coches) / float(coches_total)
+                time_semaforo = int(rent * tiempo_interseccion)
+                inter_write[calle.ID] = time_semaforo
         inters_write.append(inter_write)
 
-    with open("result.txt", "w") as f:
+    with open("result_" + filename, "w") as f:
         f.write(str(len(inters_write)) + '\n')
         counter = 0
         for inter in inters_write:
